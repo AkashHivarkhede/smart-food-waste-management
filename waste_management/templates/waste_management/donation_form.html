@@ -1,0 +1,82 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Record Donation</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+
+  <body>
+    <div class="dashboard">
+      <main class="dashboard-content">
+        <div class="form-card">
+          <h1>Record Donation</h1>
+
+          <p>Record surplus food donated to a recipient.</p>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="error-message">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label>Surplus Food</label>
+
+              <select name="surplus_food" class="form-control" required>
+                <option value="">Select surplus food</option>
+
+                {% for surplus in surplus_foods %}
+                  <option value="{{ surplus.id }}">{{ surplus.food.food_name }}
+                    -
+                    {{ surplus.quantity }}
+                    units available</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Donation Quantity</label>
+
+              <input type="number" name="quantity" class="form-control" min="1" required />
+            </div>
+
+            <div class="form-group">
+              <label>Recipient</label>
+
+              <input type="text" name="recipient" class="form-control" placeholder="Organization or recipient" required />
+            </div>
+
+            <div class="form-group">
+              <label>Donation Date</label>
+
+              <input type="date" name="donation_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required />
+            </div>
+
+            <div class="form-group">
+              <label>Notes</label>
+
+              <textarea name="notes" class="form-control" rows="4" placeholder="Optional notes"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <a href="{% url 'donation_list' %}" class="cancel-btn">Cancel</a>
+
+              <button type="submit" class="primary-btn">Save Donation</button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

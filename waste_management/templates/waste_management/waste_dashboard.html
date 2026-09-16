@@ -1,0 +1,212 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Waste Analytics | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Waste Analytics
+{% endblock %}
+
+{% block page_subtitle %}
+  Monitor food waste and financial loss.
+{% endblock %}
+
+{% block content %}
+  <!--               =========================================
+     PAGE HEADER
+     =========================================               -->
+
+  <div class="page-header">
+    <div>
+      <h1>Waste Analytics</h1>
+
+      <p>Monitor food waste and financial loss.</p>
+    </div>
+  </div>
+
+  <!--               =========================================
+     SUMMARY CARDS
+     =========================================               -->
+
+  <div class="stats-grid">
+    <!-- PREPARED -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-clipboard-check"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Total Prepared</span>
+
+        <h2>{{ total_prepared }}</h2>
+      </div>
+    </div>
+
+    <!-- SOLD -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-currency-rupee"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Total Sold</span>
+
+        <h2>{{ total_sold }}</h2>
+      </div>
+    </div>
+
+    <!-- WASTE -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-trash3"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Total Waste</span>
+
+        <h2>{{ total_waste }}</h2>
+      </div>
+    </div>
+
+    <!-- LOSS -->
+
+    <div class="stat-card">
+      <div class="stat-icon">₹</div>
+
+      <div>
+        <span class="stat-label">Estimated Loss</span>
+
+        <h2>₹{{ total_waste_cost }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!--               =========================================
+     ANALYSIS
+     =========================================               -->
+
+  <div class="analysis-grid">
+    <!-- WASTE RATE -->
+
+    <div class="analysis-card">
+      <h3>Waste Rate</h3>
+
+      <div class="waste-rate">
+        <strong>{{ waste_percentage }}%</strong>
+      </div>
+
+      {% if waste_percentage < 5 %}
+        <p class="good-text">Excellent waste control</p>
+      {% elif waste_percentage < 10 %}
+        <p class="good-text">Waste level is acceptable</p>
+      {% elif waste_percentage < 20 %}
+        <p class="warning-text">⚠️ Waste needs attention</p>
+      {% else %}
+        <p class="danger-text">🚨 Critical waste level</p>
+      {% endif %}
+    </div>
+
+    <!-- MOST WASTED FOOD -->
+
+    <div class="analysis-card">
+      <h3>Most Wasted Food</h3>
+
+      {% if most_wasted_food %}
+        <div class="most-wasted">
+          <h2>{{ most_wasted_food.production_record__food__food_name }}</h2>
+
+          <p>{{ most_wasted_food.total_waste }}
+            units wasted</p>
+        </div>
+      {% else %}
+        <p>No waste data available.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!--               =========================================
+     WASTE BY REASON
+     =========================================               -->
+
+  <div class="table-container">
+    <div class="table-title">
+      <h3>Waste by Reason</h3>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Reason</th>
+
+          <th>Waste Quantity</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for item in waste_by_reason %}
+          <tr>
+            <td>{{ item.reason }}</td>
+
+            <td>{{ item.total_waste }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="2" class="empty-state">No waste records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!--         =========================================
+     RECENT WASTE
+     =========================================         -->
+
+  <div class="table-container">
+    <div class="table-title">
+      <h3>Recent Waste Records</h3>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+
+          <th>Food</th>
+
+          <th>Quantity</th>
+
+          <th>Cost</th>
+
+          <th>Reason</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for waste in recent_waste %}
+          <tr>
+            <td>{{ waste.created_at|date:'d M Y' }}</td>
+
+            <td>
+              <strong>{{ waste.production_record.food.food_name }}</strong>
+            </td>
+
+            <td>{{ waste.wasted_quantity }}</td>
+
+            <td>₹{{ waste.waste_cost }}</td>
+
+            <td>{{ waste.reason }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="empty-state">No waste records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

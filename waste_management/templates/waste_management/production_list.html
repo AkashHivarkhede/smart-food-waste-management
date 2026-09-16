@@ -1,0 +1,396 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Production Records | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Production Records
+{% endblock %}
+
+{% block page_subtitle %}
+  Track daily food preparation, sales and waste.
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================================
+     PAGE HEADER
+     ========================================= -->
+
+<div class="page-header">
+
+  <div>
+
+    <h1>
+      Production Records
+    </h1>
+
+    <p>
+      Track daily food preparation, sales and waste.
+    </p>
+
+  </div>
+
+
+  <a
+    href="{% url 'add_production' %}"
+    class="primary-btn"
+  >
+    + Add Record
+  </a>
+
+</div>
+
+
+<!-- =========================================
+     FILTER
+     ========================================= -->
+
+<div class="report-filter">
+
+  <div>
+
+    <h3>
+      Production Period
+    </h3>
+
+    <p>
+
+      {% if filter_type == "all" %}
+
+        All Records
+
+      {% else %}
+
+        {% if start_date %}
+          {{ start_date|date:"d M Y" }}
+        {% endif %}
+
+        {% if end_date %}
+          -
+          {{ end_date|date:"d M Y" }}
+        {% endif %}
+
+      {% endif %}
+
+    </p>
+
+  </div>
+
+
+  <form
+    method="GET"
+    class="report-filter-form"
+  >
+
+    <select
+      name="filter"
+      class="form-control"
+      onchange="this.form.submit()"
+    >
+
+      <option
+        value="all"
+        {% if filter_type == "all" %}selected{% endif %}
+      >
+        All Records
+      </option>
+
+
+      <option
+        value="today"
+        {% if filter_type == "today" %}selected{% endif %}
+      >
+        Today
+      </option>
+
+
+      <option
+        value="week"
+        {% if filter_type == "week" %}selected{% endif %}
+      >
+        This Week
+      </option>
+
+
+      <option
+        value="month"
+        {% if filter_type == "month" %}selected{% endif %}
+      >
+        This Month
+      </option>
+
+
+      <option
+        value="custom"
+        {% if filter_type == "custom" %}selected{% endif %}
+      >
+        Custom Range
+      </option>
+
+    </select>
+
+
+    {% if filter_type == "custom" %}
+
+      <input
+        type="date"
+        name="start_date"
+        value="{{ start_date|date:'Y-m-d' }}"
+        class="form-control"
+      >
+
+
+      <input
+        type="date"
+        name="end_date"
+        value="{{ end_date|date:'Y-m-d' }}"
+        class="form-control"
+      >
+
+
+      <button
+        type="submit"
+        class="primary-btn"
+      >
+        Apply
+      </button>
+
+    {% endif %}
+
+  </form>
+
+</div>
+
+
+<br>
+
+
+<!-- =========================================
+     RECORD COUNT
+     ========================================= -->
+
+<div class="panel-header">
+
+  <h3>
+    Production Records
+  </h3>
+
+  <span>
+    {{ records.paginator.count }} records
+  </span>
+
+</div>
+
+
+<!-- =========================================
+     TABLE
+     ========================================= -->
+
+<div class="table-container">
+
+  <table>
+
+    <thead>
+
+      <tr>
+
+        <th>
+          Date
+        </th>
+
+        <th>
+          Food
+        </th>
+
+        <th>
+          Prepared
+        </th>
+
+        <th>
+          Sold
+        </th>
+
+        <th>
+          Remaining
+        </th>
+
+        <th>
+          Waste
+        </th>
+
+        <th>
+          Recorded By
+        </th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      {% for record in records %}
+
+        <tr>
+
+          <td>
+            {{ record.record_date|date:"d M Y" }}
+          </td>
+
+
+          <td>
+
+            <strong>
+              {{ record.food.food_name }}
+            </strong>
+
+          </td>
+
+
+          <td>
+            {{ record.prepared_quantity }}
+          </td>
+
+
+          <td>
+            {{ record.sold_quantity }}
+          </td>
+
+
+          <td>
+            {{ record.remaining_quantity }}
+          </td>
+
+
+          <td>
+
+            {% if record.wasted_quantity > 0 %}
+
+              <span class="waste-badge">
+                {{ record.wasted_quantity }}
+              </span>
+
+            {% else %}
+
+              <span class="status-active">
+                0
+              </span>
+
+            {% endif %}
+
+          </td>
+
+
+          <td>
+            {{ record.recorded_by.username }}
+          </td>
+
+        </tr>
+
+
+      {% empty %}
+
+        <tr>
+
+          <td
+            colspan="7"
+            class="empty-state"
+          >
+            No production records found.
+          </td>
+
+        </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+<br>
+<!-- =========================================
+     PAGINATION
+     ========================================= -->
+
+{% if records.paginator.num_pages > 1 %}
+
+<div class="pagination">
+
+    <!-- PREVIOUS -->
+
+    {% if records.has_previous %}
+
+        <a
+            href="?page={{ records.previous_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}"
+            class="pagination-btn"
+        >
+            ← Previous
+        </a>
+
+    {% else %}
+
+        <span class="pagination-btn disabled">
+            ← Previous
+        </span>
+
+    {% endif %}
+
+
+    <!-- PAGE NUMBERS -->
+
+    {% for num in page_range %}
+
+        {% if num == "…" %}
+
+            <span class="pagination-ellipsis">
+                …
+            </span>
+
+        {% elif num == records.number %}
+
+            <span class="pagination-btn active">
+                {{ num }}
+            </span>
+
+        {% else %}
+
+            <a
+                href="?page={{ num }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}"
+                class="pagination-btn"
+            >
+                {{ num }}
+            </a>
+
+        {% endif %}
+
+    {% endfor %}
+
+
+    <!-- NEXT -->
+
+    {% if records.has_next %}
+
+        <a
+            href="?page={{ records.next_page_number }}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}"
+            class="pagination-btn"
+        >
+            Next →
+        </a>
+
+    {% else %}
+
+        <span class="pagination-btn disabled">
+            Next →
+        </span>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}

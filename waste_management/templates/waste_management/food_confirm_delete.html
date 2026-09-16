@@ -1,0 +1,37 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Delete Food | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Delete Food
+{% endblock %}
+
+{% block page_subtitle %}
+  Remove a food item from the system.
+{% endblock %}
+
+{% block content %}
+  <div class="form-card delete-card">
+    <h1>Delete Food</h1>
+
+    <p>
+      Are you sure you want to delete
+
+      <strong>{{ food.food_name }}</strong>?
+    </p>
+
+    <p class="warning-text">This action cannot be undone.</p>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="form-actions">
+        <a href="{% url 'food_list' %}" class="cancel-btn">Cancel</a>
+
+        <button type="submit" class="delete-confirm-btn">Yes, Delete</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

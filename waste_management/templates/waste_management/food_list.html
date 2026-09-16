@@ -1,0 +1,93 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Food Management | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Food Management
+{% endblock %}
+
+{% block page_subtitle %}
+  Manage food items and pricing.
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Food Management</h1>
+
+      <p>Manage food items and pricing.</p>
+    </div>
+
+    <a href="{% url 'add_food' %}" class="primary-btn">+ Add Food</a>
+  </div>
+
+  <!-- SEARCH -->
+
+  <form method="GET" class="search-form">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search food..." />
+
+    <button type="submit">Search</button>
+  </form>
+
+  <!-- FOOD TABLE -->
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+
+          <th>Food</th>
+
+          <th>Category</th>
+
+          <th>Cost</th>
+
+          <th>Selling Price</th>
+
+          <th>Status</th>
+
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for food in foods %}
+          <tr>
+            <td>{{ food.id }}</td>
+
+            <td>
+              <strong>{{ food.food_name }}</strong>
+            </td>
+
+            <td>{{ food.get_category_display }}</td>
+
+            <td>₹{{ food.cost_per_unit }}</td>
+
+            <td>₹{{ food.selling_price }}</td>
+
+            <td>
+              {% if food.is_available %}
+                <span class="status-active">Available</span>
+              {% else %}
+                <span class="status-inactive">Unavailable</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <a href="{% url 'edit_food' food.id %}" class="edit-btn">Edit</a>
+
+              <a href="{% url 'delete_food' food.id %}" class="delete-btn">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="empty-state">No food items found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

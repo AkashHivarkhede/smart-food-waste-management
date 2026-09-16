@@ -1,0 +1,217 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Preparation Planner | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Preparation Planner
+{% endblock %}
+
+{% block page_subtitle %}
+  ML-powered food preparation recommendations.
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Daily Preparation Planner</h1>
+
+      <p>Use historical demand to plan how much food should be prepared.</p>
+    </div>
+  </div>
+
+  <!-- DATE FILTER -->
+
+  <div class="form-card">
+    <form method="GET">
+      <div class="form-group">
+        <label>Preparation Date</label>
+
+        <input type="date" name="date" class="form-control" value="{{ target_date|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" required />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-btn">Generate Plan</button>
+      </div>
+    </form>
+  </div>
+
+  <br />
+
+  <!--                =========================================
+     SUMMARY
+     =========================================                -->
+
+  <div class="stats-grid">
+    <!-- FOOD ITEMS -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-egg-fried"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Food Items</span>
+
+        <h2>{{ predictions|length }}</h2>
+
+        <small>Items included in plan</small>
+      </div>
+    </div>
+
+    <!-- PLANNING DATE -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Planning Date</span>
+
+        <h2>{{ target_date|date:'d M' }}</h2>
+
+        <small>Preparation date</small>
+      </div>
+    </div>
+
+    <!-- EXPECTED SALES -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Expected Sales</span>
+
+        <h2>{{ total_expected_sales }}</h2>
+
+        <small>Estimated demand</small>
+      </div>
+    </div>
+
+    <!-- RECOMMENDED PREPARATION -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-lightbulb"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Total Preparation</span>
+
+        <h2>{{ total_recommended }}</h2>
+
+        <small>Recommended quantity</small>
+      </div>
+    </div>
+  </div>
+
+  <br />
+
+  <!--                =========================================
+     PLANNING INSIGHTS
+     =========================================                -->
+
+  <div class="stats-grid">
+    <!-- SAFETY BUFFER -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-shield-check"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Safety Buffer</span>
+
+        <h2>{{ total_safety_buffer }}</h2>
+
+        <small>Extra quantity for demand variation</small>
+      </div>
+    </div>
+
+    <!-- ESTIMATED WASTE -->
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="bi bi-trash3"></i>
+      </div>
+
+      <div>
+        <span class="stat-label">Estimated Waste</span>
+
+        <h2>{{ estimated_waste }}</h2>
+
+        <small>Based on historical waste rate</small>
+      </div>
+    </div>
+  </div>
+
+  <br />
+
+  <!-- PREPARATION PLAN -->
+
+  <div class="table-container">
+    <div class="table-title">
+      <h3>Recommended Preparation</h3>
+      <br />
+      <a href="{% url 'review_preparation_plan' %}?date={{ target_date|date:'Y-m-d' }}" class="primary-btn">Review Full Plan</a>
+    </div>
+    <br />
+
+    <table>
+      <thead>
+        <tr>
+          <th>Food</th>
+
+          <th>Expected Sales</th>
+
+          <th>Waste Rate</th>
+
+          <th>Safety Buffer</th>
+
+          <th>Recommended</th>
+
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for prediction in predictions %}
+          <tr>
+            <td>
+              <strong>{{ prediction.food_name }}</strong>
+            </td>
+
+            <td>{{ prediction.predicted_sales }}
+
+              units</td>
+
+            <td>{{ prediction.waste_rate }}%</td>
+
+            <td>{{ prediction.safety_buffer }}
+
+              units</td>
+
+            <td>
+              <strong>
+                {{ prediction.recommended_quantity }}
+                units
+              </strong>
+            </td>
+
+            <td>
+              <a href="{% url 'add_production' %}?food={{ prediction.food_id }}&date={{ prediction.target_date|date:'Y-m-d' }}&recommended={{ prediction.recommended_quantity }}" class="primary-btn">Use</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="empty-state">No prediction data available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

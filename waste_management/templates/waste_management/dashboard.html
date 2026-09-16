@@ -1,0 +1,67 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Admin Dashboard | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Admin Dashboard
+{% endblock %}
+
+{% block page_subtitle %}
+  Manage the complete food waste reduction system.
+{% endblock %}
+
+{% block content %}
+  <div class="dashboard-grid">
+    <!-- FOOD MANAGEMENT -->
+
+    <a href="{% url 'food_list' %}" style="text-decoration: none; color: inherit;">
+      <div class="dashboard-card">
+        <h3>🍱 Food Management</h3>
+
+        <p>Add, update and manage food items.</p>
+      </div>
+    </a>
+
+    <!-- PRODUCTION -->
+
+    <a href="{% url 'production_list' %}" style="text-decoration: none; color: inherit;">
+      <div class="dashboard-card">
+        <h3>📝 Production Records</h3>
+
+        <p>Monitor food production, sales and waste.</p>
+      </div>
+    </a>
+
+    <!-- WASTE ANALYTICS -->
+
+    <a href="{% url 'waste_dashboard' %}" style="text-decoration: none; color: inherit;">
+      <div class="dashboard-card">
+        <h3>📊 Waste Analytics</h3>
+
+        <p>Analyze food waste, waste percentage and financial loss.</p>
+      </div>
+    </a>
+
+    <!-- SURPLUS -->
+
+    <a href="{% url 'surplus_list' %}" style="text-decoration: none; color: inherit;">
+      <div class="dashboard-card">
+        <h3>♻️ Surplus Food</h3>
+
+        <p>Manage remaining food and donation opportunities.</p>
+      </div>
+    </a>
+
+    <!-- DONATIONS -->
+
+    <a href="{% url 'donation_list' %}" style="text-decoration: none; color: inherit;">
+      <div class="dashboard-card">
+        <h3>❤️ Donations</h3>
+
+        <p>Manage surplus food donations and donation records.</p>
+      </div>
+    </a>
+  </div>
+{% endblock %}

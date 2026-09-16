@@ -1,0 +1,99 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Surplus Food | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Surplus Food
+{% endblock %}
+
+{% block page_subtitle %}
+  Manage remaining food before disposal.
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Surplus Food</h1>
+
+      <p>Track remaining food and donation opportunities.</p>
+    </div>
+
+    <div>
+      <a href="{% url 'add_surplus' %}" class="primary-btn">+ Add Surplus</a>
+
+      <a href="{% url 'donation_list' %}" class="secondary-btn">Donations</a>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+
+          <th>Food</th>
+
+          <th>Quantity</th>
+
+          <th>Status</th>
+
+          <th>Notes</th>
+
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for surplus in surplus_foods %}
+          <tr>
+            <td>{{ surplus.surplus_date }}</td>
+
+            <td>
+              <strong>{{ surplus.food.food_name }}</strong>
+            </td>
+
+            <td>{{ surplus.quantity }}</td>
+
+            <td>
+              {% if surplus.status == 'Available' %}
+                <span class="status-active">Available</span>
+              {% elif surplus.status == 'Donated' %}
+                <span class="status-donated">Donated</span>
+              {% elif surplus.status == 'Consumed' %}
+                <span class="status-consumed">Consumed</span>
+              {% elif surplus.status == 'Disposed' %}
+                <span class="status-disposed">Disposed</span>
+              {% endif %}
+            </td>
+
+            <td>{{ surplus.notes|default:'-' }}</td>
+
+            <td>
+              {% if surplus.status == 'Available' %}
+                <form method="POST" action="{% url 'update_surplus_status' surplus.id %}" style="display:flex; gap:6px; align-items:center;">
+                  {% csrf_token %}
+
+                  <select name="status" class="small-select">
+                    <option value="Consumed">Consumed</option>
+
+                    <option value="Disposed">Disposed</option>
+                  </select>
+
+                  <button type="submit" class="small-btn">Update</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="empty-state">No surplus food records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

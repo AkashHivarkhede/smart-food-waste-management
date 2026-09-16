@@ -1,0 +1,286 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Admin Dashboard | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Admin Dashboard
+{% endblock %}
+
+{% block page_subtitle %}
+  Monitor and manage the complete food waste reduction system.
+{% endblock %}
+
+{% block content %}
+  <!--         =========================================
+     DASHBOARD HEADER
+     =========================================         -->
+
+  {% comment %} <div class="dashboard-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+
+      <p>Monitor and manage the complete food waste reduction system.</p>
+    </div>
+
+    <div class="user-info">
+      <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+
+      <div>
+        <strong>{{ request.user.username }}</strong>
+
+        <span>Administrator</span>
+      </div>
+    </div>
+  </div> {% endcomment %}
+
+  <!--         =========================================
+     STATISTICS
+     =========================================         -->
+
+  <div class="stats-grid">
+    <!-- FOOD ITEMS -->
+
+    <div class="dashboard-stat-card">
+      <div class="dashboard-stat-icon">
+        <i class="bi bi-egg-fried"></i>
+      </div>
+
+      <div>
+        <span>Total Food Items</span>
+
+        <h2>{{ total_food_items }}</h2>
+
+        <small>Food items in system</small>
+      </div>
+    </div>
+
+    <!-- PREPARED -->
+
+    <div class="dashboard-stat-card">
+      <div class="dashboard-stat-icon">
+        <i class="bi bi-clipboard-check"></i>
+      </div>
+
+      <div>
+        <span>Total Prepared</span>
+
+        <h2>{{ total_prepared }}</h2>
+
+        <small>Production quantity</small>
+      </div>
+    </div>
+
+    <!-- SOLD -->
+
+    <div class="dashboard-stat-card">
+      <div class="dashboard-stat-icon">
+        <i class="bi bi-currency-rupee"></i>
+      </div>
+
+      <div>
+        <span>Total Sold</span>
+
+        <h2>{{ total_sold }}</h2>
+
+        <small>Sold quantity</small>
+      </div>
+    </div>
+
+    <!-- WASTE -->
+
+    <div class="dashboard-stat-card">
+      <div class="dashboard-stat-icon">
+        <i class="bi bi-trash3"></i>
+      </div>
+
+      <div>
+        <span>Total Waste</span>
+
+        <h2>{{ total_waste }}</h2>
+
+        <small>Wasted quantity</small>
+      </div>
+    </div>
+  </div>
+
+  <!--         =========================================
+     MAIN ANALYSIS
+     =========================================         -->
+
+  <div class="dashboard-grid">
+    <!-- WASTE RATE -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Waste Overview</h3>
+
+        <a href="{% url 'waste_dashboard' %}">View Analytics →</a>
+      </div>
+
+      <div class="waste-rate-display">
+        <strong>{{ waste_percentage }}%</strong>
+
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ waste_percentage }}%;"></div>
+        </div>
+
+        {% if waste_percentage < 5 %}
+          <p class="good-text">Excellent waste control</p>
+        {% elif waste_percentage < 10 %}
+          <p class="good-text">Waste level is acceptable</p>
+        {% elif waste_percentage < 20 %}
+          <p class="warning-text">⚠️ Waste needs attention</p>
+        {% else %}
+          <p class="danger-text">🚨 Critical waste level</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- MOST WASTED FOOD -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Most Wasted Food</h3>
+
+        <a href="{% url 'waste_dashboard' %}">View Details →</a>
+      </div>
+
+      {% if most_wasted_food %}
+        <div class="food-insight">
+          <div class="food-insight-icon">
+            <i class="bi bi-trash3"></i>
+          </div>
+
+          <div>
+            <h2>{{ most_wasted_food.production_record__food__food_name }}</h2>
+
+            <p>{{ most_wasted_food.total_waste }}
+              units wasted</p>
+          </div>
+        </div>
+      {% else %}
+        <p class="panel-description">No waste data available yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- AVAILABLE SURPLUS -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Available Surplus</h3>
+
+        <a href="{% url 'surplus_list' %}">View Surplus →</a>
+      </div>
+
+      <div class="surplus-number">
+        <strong>{{ available_surplus }}</strong>
+
+        <span>units currently available</span>
+      </div>
+
+      <p class="panel-description">Food remaining after production that can potentially be donated or otherwise managed.</p>
+    </div>
+
+    <!-- DONATIONS -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Total Donated</h3>
+
+        <a href="{% url 'donation_list' %}">View Donations →</a>
+      </div>
+
+      <div class="surplus-number">
+        <strong>{{ total_donated }}</strong>
+
+        <span>units donated</span>
+      </div>
+
+      <p class="panel-description">Total surplus food successfully donated.</p>
+    </div>
+  </div>
+
+  <!--         =========================================
+     RECENT ACTIVITY
+     =========================================         -->
+
+  <div class="recent-grid">
+    <!-- RECENT PRODUCTION -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Recent Production</h3>
+
+        <a href="{% url 'production_list' %}">View All →</a>
+      </div>
+
+      {% for record in recent_production %}
+        <div class="mini-row">
+          <div>
+            <strong>{{ record.food.food_name }}</strong>
+
+            <span>{{ record.record_date }}</span>
+          </div>
+
+          <div class="mini-values">
+            <strong>{{ record.prepared_quantity }}</strong>
+
+            <span>prepared</span>
+          </div>
+        </div>
+      {% empty %}
+        <p class="panel-description">No production records found.</p>
+      {% endfor %}
+    </div>
+
+    <!-- RECENT WASTE -->
+
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <h3>Recent Waste</h3>
+
+        <a href="{% url 'waste_dashboard' %}">View All →</a>
+      </div>
+
+      {% for waste in recent_waste %}
+        <div class="mini-row">
+          <div>
+            <strong>{{ waste.production_record.food.food_name }}</strong>
+
+            <span>{{ waste.created_at|date:'d M Y' }}</span>
+          </div>
+
+          <div class="mini-values">
+            <strong class="waste-value">{{ waste.wasted_quantity }}</strong>
+
+            <span>units wasted</span>
+          </div>
+        </div>
+      {% empty %}
+        <p class="panel-description">No waste records found.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!--         =========================================
+     QUICK ACTIONS
+     =========================================         -->
+
+  <div class="dashboard-panel" style="margin-top: 20px;">
+    <div class="panel-header">
+      <h3>Quick Actions</h3>
+    </div>
+
+    <div class="dashboard-grid">
+      <a href="{% url 'add_food' %}" class="primary-btn">+ Add Food</a>
+
+      <a href="{% url 'add_production' %}" class="primary-btn">+ Add Production</a>
+
+      <a href="{% url 'add_surplus' %}" class="primary-btn">+ Add Surplus</a>
+
+      <a href="{% url 'add_donation' %}" class="primary-btn">+ Record Donation</a>
+    </div>
+  </div>
+{% endblock %}

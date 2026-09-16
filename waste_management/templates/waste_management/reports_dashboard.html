@@ -1,0 +1,487 @@
+{% extends "waste_management/base.html" %}
+
+
+{% block title %}
+    Reports | Smart Food Waste
+{% endblock %}
+
+
+{% block page_title %}
+    Management Reports
+{% endblock %}
+
+
+{% block page_subtitle %}
+    Analyze food production, sales and waste.
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================================
+     FILTER
+     ========================================= -->
+
+<div class="report-filter">
+
+    <div>
+
+        <h3>
+            Report Period
+        </h3>
+
+        <p>
+            {{ start_date|date:"d M Y" }}
+            -
+            {{ end_date|date:"d M Y" }}
+        </p>
+
+    </div>
+
+
+    <form
+        method="GET"
+        class="report-filter-form"
+    >
+
+        <select
+            name="filter"
+            class="form-control"
+            onchange="this.form.submit()"
+        >
+
+            <option
+                value="today"
+                {% if filter_type == "today" %}selected{% endif %}
+            >
+                Today
+            </option>
+
+
+            <option
+                value="week"
+                {% if filter_type == "week" %}selected{% endif %}
+            >
+                This Week
+            </option>
+
+
+            <option
+                value="month"
+                {% if filter_type == "month" %}selected{% endif %}
+            >
+                This Month
+            </option>
+
+
+            <option
+                value="custom"
+                {% if filter_type == "custom" %}selected{% endif %}
+            >
+                Custom Range
+            </option>
+
+        </select>
+
+
+        {% if filter_type == "custom" %}
+
+            <input
+                type="date"
+                name="start_date"
+                value="{{ start_date|date:'Y-m-d' }}"
+                class="form-control"
+            >
+
+
+            <input
+                type="date"
+                name="end_date"
+                value="{{ end_date|date:'Y-m-d' }}"
+                class="form-control"
+            >
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+                Apply
+            </button>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+
+<!-- =========================================
+     SUMMARY
+     ========================================= -->
+
+<div class="stats-grid">
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            <i class="bi bi-clipboard-check"></i>
+        </div>
+
+        <div>
+
+            <span class="stat-label">
+                Total Prepared
+            </span>
+
+            <h2>
+                {{ total_prepared }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            <i class="bi bi-currency-rupee"></i>
+        </div>
+
+        <div>
+
+            <span class="stat-label">
+                Total Sold
+            </span>
+
+            <h2>
+                {{ total_sold }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            <i class="bi bi-trash3"></i>
+        </div>
+
+        <div>
+
+            <span class="stat-label">
+                Total Waste
+            </span>
+
+            <h2>
+                {{ total_waste }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            ₹
+        </div>
+
+        <div>
+
+            <span class="stat-label">
+                Waste Cost
+            </span>
+
+            <h2>
+                ₹{{ total_waste_cost }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================
+     ANALYSIS
+     ========================================= -->
+
+<div class="analysis-grid">
+
+
+    <div class="analysis-card">
+
+        <h3>
+            Waste Percentage
+        </h3>
+
+
+        <div class="waste-rate">
+
+            <strong>
+                {{ waste_percentage }}%
+            </strong>
+
+        </div>
+
+
+        {% if waste_percentage < 5 %}
+
+            <p class="good-text">
+                Excellent waste control
+            </p>
+
+        {% elif waste_percentage < 10 %}
+
+            <p class="good-text">
+                Waste level is acceptable
+            </p>
+
+        {% elif waste_percentage < 20 %}
+
+            <p class="warning-text">
+                ⚠️ Waste needs attention
+            </p>
+
+        {% else %}
+
+            <p class="danger-text">
+                🚨 Critical waste level
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <div class="analysis-card">
+
+        <h3>
+            Most Wasted Food
+        </h3>
+
+
+        {% if most_wasted_food %}
+
+            <div class="most-wasted">
+
+                <h2>
+                    {{ most_wasted_food.production_record__food__food_name }}
+                </h2>
+
+                <p>
+                    {{ most_wasted_food.total_waste }}
+                    units wasted
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <p>
+                No waste data available.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================
+     WASTE BY REASON
+     ========================================= -->
+
+<div class="table-container">
+
+    <div class="table-title">
+
+        <h3>
+            Waste by Reason
+        </h3>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Reason
+                </th>
+
+                <th>
+                    Waste Quantity
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for item in waste_by_reason %}
+
+                <tr>
+
+                    <td>
+                        {{ item.reason }}
+                    </td>
+
+                    <td>
+                        {{ item.total_waste }}
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="2"
+                        class="empty-state"
+                    >
+                        No waste records found.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+<!-- =========================================
+     RECENT WASTE
+     ========================================= -->
+
+<div class="table-container">
+
+    <div class="table-title">
+
+        <h3>
+            Recent Waste Records
+        </h3>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Food
+                </th>
+
+                <th>
+                    Quantity
+                </th>
+
+                <th>
+                    Cost
+                </th>
+
+                <th>
+                    Reason
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for waste in recent_waste %}
+
+                <tr>
+
+                    <td>
+                        {{ waste.production_record.record_date|date:"d M Y" }}
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+                            {{ waste.production_record.food.food_name }}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+                        {{ waste.wasted_quantity }}
+                    </td>
+
+
+                    <td>
+                        ₹{{ waste.waste_cost }}
+                    </td>
+
+
+                    <td>
+                        {{ waste.reason }}
+                    </td>
+
+                </tr>
+
+
+            {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="empty-state"
+                    >
+                        No waste records found.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+{% endblock %}

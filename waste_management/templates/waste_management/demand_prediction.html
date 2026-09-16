@@ -1,0 +1,229 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Demand Prediction | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Demand Prediction
+{% endblock %}
+
+{% block page_subtitle %}
+  Predict food demand and plan preparation.
+{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+  <h1>Food Demand Prediction</h1>
+
+  <p>
+    Use historical sales data to estimate how much food
+    should be prepared.
+  </p>
+
+  <form method="POST">
+
+    {% csrf_token %}
+
+    <!-- FOOD -->
+
+    <div class="form-group">
+
+      <label>Food Item</label>
+
+      <select
+        name="food"
+        class="form-control"
+        required
+      >
+
+        <option value="">
+          Select food item
+        </option>
+
+        {% for food in foods %}
+
+          <option
+            value="{{ food.id }}"
+            {% if selected_food and selected_food.id == food.id %}
+              selected
+            {% endif %}
+          >
+            {{ food.food_name }}
+          </option>
+
+        {% endfor %}
+
+      </select>
+
+    </div>
+
+
+    <!-- DATE -->
+
+    <div class="form-group">
+
+      <label>Prediction Date</label>
+
+      <input
+        type="date"
+        name="target_date"
+        class="form-control"
+        value="{{ selected_date|default:'' }}"
+        min="{{ today|date:'Y-m-d' }}"
+        required
+      >
+
+    </div>
+
+
+    <!-- BUTTON -->
+
+    <div class="form-actions">
+
+      <button
+        type="submit"
+        class="primary-btn"
+      >
+        Predict Demand
+      </button>
+
+    </div>
+
+  </form>
+
+</div>
+
+
+{% if prediction %}
+
+<br>
+
+<div class="analysis-grid">
+
+  <!-- PREDICTED SALES -->
+
+  <div class="analysis-card">
+
+    <h3>Expected Sales</h3>
+
+    <div class="waste-rate">
+
+      <strong>
+        {{ prediction.predicted_sales }}
+      </strong>
+
+      <span> units</span>
+
+    </div>
+
+    <p>
+      Estimated customer demand.
+    </p>
+
+  </div>
+
+
+  <!-- SAFETY BUFFER -->
+
+  <div class="analysis-card">
+
+    <h3>Safety Buffer</h3>
+
+    <div class="waste-rate">
+
+      <strong>
+        {{ prediction.safety_buffer }}
+      </strong>
+
+      <span> units</span>
+
+    </div>
+
+    <p>
+      Additional quantity recommended
+      to handle demand variation.
+    </p>
+
+  </div>
+
+  <!-- HISTORICAL WASTE -->
+
+    <div class="analysis-card">
+
+        <h3>Historical Waste Rate</h3>
+
+        <div class="waste-rate">
+
+            <strong>
+            {{ prediction.waste_rate }}%
+            </strong>
+
+        </div>
+
+        <p>
+            Historical waste rate for this food item.
+        </p>
+
+    </div>
+
+</div>
+
+<!-- RECOMMENDATION -->
+
+<div class="dashboard-panel">
+
+  <div class="panel-header">
+    <h3>
+      Recommended Preparation
+    </h3>
+  </div>
+
+  <div class="surplus-number">
+
+    <strong>
+      {{ prediction.recommended_quantity }}
+    </strong>
+
+    <span>
+      units of {{ selected_food.food_name }}
+    </span>
+
+  </div>
+
+  <div style="margin-top: 20px;">
+
+    <a
+      href="{% url 'add_production' %}?food={{ prediction.food_id }}&date={{ prediction.target_date|date:'Y-m-d' }}&recommended={{ prediction.recommended_quantity }}"
+      class="primary-btn"
+    >
+      Use Recommendation
+    </a>
+
+  </div>
+
+  <p class="panel-description">
+
+    Based on historical sales patterns,
+    the system recommends preparing
+
+    <strong>
+      {{ prediction.recommended_quantity }}
+      units
+    </strong>
+
+    for
+
+    <strong>
+      {{ prediction.target_date|date:"d M Y" }}
+    </strong>.
+
+  </p>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

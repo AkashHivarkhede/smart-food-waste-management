@@ -1,0 +1,71 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Add Surplus Food | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Add Surplus Food
+{% endblock %}
+
+{% block page_subtitle %}
+  Surplus Food Management
+{% endblock %}
+
+{% block content %}
+  <div class="form-card">
+    <h1>Add Surplus Food</h1>
+
+    <p>Record food that remains after service.</p>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- FOOD -->
+
+      <div class="form-group">
+        <label>Food Item</label>
+
+        <select name="food" class="form-control" required>
+          <option value="">Select food</option>
+
+          {% for food in foods %}
+            <option value="{{ food.id }}">{{ food.food_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- QUANTITY -->
+
+      <div class="form-group">
+        <label>Quantity</label>
+
+        <input type="number" name="quantity" class="form-control" min="1" required />
+      </div>
+
+      <!-- DATE -->
+
+      <div class="form-group">
+        <label>Date</label>
+
+        <input type="date" name="surplus_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required />
+      </div>
+
+      <!-- NOTES -->
+
+      <div class="form-group">
+        <label>Notes</label>
+
+        <textarea name="notes" class="form-control" rows="4" placeholder="Optional notes"></textarea>
+      </div>
+
+      <!-- ACTIONS -->
+
+      <div class="form-actions">
+        <a href="{% url 'surplus_list' %}" class="cancel-btn">Cancel</a>
+
+        <button type="submit" class="primary-btn">Save Surplus</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

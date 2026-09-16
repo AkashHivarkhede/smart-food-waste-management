@@ -1,0 +1,135 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Review Preparation Plan | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Review Preparation Plan
+{% endblock %}
+
+{% block page_subtitle %}
+  Review ML recommendations before recording production.
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>📝 Review Preparation Plan</h1>
+
+      <p>Review the recommended quantities for
+        {{ target_date|date:'d M Y' }} before recording production.</p>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🍱</div>
+
+      <div>
+        <span class="stat-label">Food Items</span>
+
+        <h2>{{ predictions|length }}</h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+
+      <div>
+        <span class="stat-label">Expected Sales</span>
+
+        <h2>{% widthratio predictions|length 1 1 %}</h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+
+      <div>
+        <span class="stat-label">Preparation Date</span>
+
+        <h2>{{ target_date|date:'d M' }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <br />
+
+  <!-- PLAN -->
+
+  <div class="table-container">
+    <div class="table-title">
+      <h3>ML Recommended Quantities</h3>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Food</th>
+
+          <th>Expected Sales</th>
+
+          <th>Waste Rate</th>
+
+          <th>Safety Buffer</th>
+
+          <th>Recommended</th>
+
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for prediction in predictions %}
+          <tr>
+            <td>
+              <strong>{{ prediction.food_name }}</strong>
+            </td>
+
+            <td>{{ prediction.predicted_sales }}
+              units</td>
+
+            <td>{{ prediction.waste_rate }}%</td>
+
+            <td>{{ prediction.safety_buffer }}
+              units</td>
+
+            <td>
+              <strong>
+                {{ prediction.recommended_quantity }}
+                units
+              </strong>
+            </td>
+
+            <td>
+              <a href="{% url 'add_production' %}?food={{ prediction.food_id }}&date={{ prediction.target_date|date:'Y-m-d' }}&recommended={{ prediction.recommended_quantity }}" class="primary-btn">📝 Record</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="empty-state">No preparation recommendations available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <br />
+
+  <!-- INFORMATION -->
+
+  <div class="dashboard-panel">
+    <div class="panel-header">
+      <h3>ℹ️ How This Works</h3>
+    </div>
+
+    <p class="panel-description">The recommended quantity is calculated using historical demand, recent sales patterns, historical waste rate and a safety buffer.</p>
+
+    <p class="panel-description">
+      Clicking <strong>Record</strong> will open the production form with the recommended preparation quantity already filled in.
+    </p>
+  </div>
+{% endblock %}

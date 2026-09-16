@@ -1,0 +1,83 @@
+{% extends 'waste_management/base.html' %}
+
+{% block title %}
+  Donations | Smart Food Waste
+{% endblock %}
+
+{% block page_title %}
+  Donation Records
+{% endblock %}
+
+{% block page_subtitle %}
+  Track surplus food donated to recipients.
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Donation Records</h1>
+
+      <p>Track surplus food donated to recipients.</p>
+    </div>
+
+    <div>
+      <a href="{% url 'add_donation' %}" class="primary-btn">+ Record Donation</a>
+
+      <a href="{% url 'surplus_list' %}" class="secondary-btn">Surplus Food</a>
+    </div>
+  </div>
+
+  <!--  =========================================
+     MESSAGES
+     =========================================  -->
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="success-message">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!--  =========================================
+     DONATION TABLE
+     =========================================  -->
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+
+          <th>Food</th>
+
+          <th>Quantity</th>
+
+          <th>Recipient</th>
+
+          <th>Notes</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for donation in donations %}
+          <tr>
+            <td>{{ donation.donation_date }}</td>
+
+            <td>
+              <strong>{{ donation.surplus_food.food.food_name }}</strong>
+            </td>
+
+            <td>{{ donation.quantity }}</td>
+
+            <td>{{ donation.recipient }}</td>
+
+            <td>{{ donation.notes|default:'-' }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="empty-state">No donation records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
