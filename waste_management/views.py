@@ -4,7 +4,11 @@ from django.contrib import messages
 from datetime import date , timedelta , datetime
 from django.utils import timezone
 from django.db import transaction
-from .ml.predictor import predict_demand
+# from .ml.predictor import predict_demand
+try:
+    from .ml.predictor import predict_demand
+except ImportError:
+    predict_demand = None
 from django.core.paginator import Paginator
 
 from .models import (
@@ -2051,6 +2055,13 @@ def reports_dashboard(request):
 @login_required
 def demand_prediction(request):
 
+    if predict_demand is None:
+        messages.error(
+            request,
+            "Demand prediction is temporarily unavailable."
+        )
+        return redirect("dashboard")
+
     # -----------------------------------------
     # ROLE CHECK
     # -----------------------------------------
@@ -2146,6 +2157,13 @@ def demand_prediction(request):
 
 @login_required
 def preparation_planner(request):
+
+    if predict_demand is None:
+        messages.error(
+            request,
+            "Demand prediction is temporarily unavailable."
+        )
+        return redirect("dashboard")
 
     # -----------------------------------------
     # ROLE CHECK
